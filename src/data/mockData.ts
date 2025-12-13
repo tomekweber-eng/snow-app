@@ -49,6 +49,22 @@ export const locations: Location[] = [
     elevation: '1,400m - 2,872m',
     tripDates: ['2024-02-14'],
   },
+  {
+    id: '6',
+    name: 'Hintertux',
+    region: 'Zillertal',
+    coordinates: { lat: 47.0667, lng: 11.6667 },
+    elevation: '1,500m - 3,250m',
+    tripDates: ['2024-02-10'],
+  },
+  {
+    id: '7',
+    name: 'Stubai Glacier',
+    region: 'Stubaital',
+    coordinates: { lat: 47.0833, lng: 11.3167 },
+    elevation: '1,750m - 3,210m',
+    tripDates: ['2024-03-15'],
+  },
 ];
 
 export const routes: Route[] = [
@@ -86,7 +102,7 @@ export const routes: Route[] = [
     date: '2024-03-05',
     participants: ['1', '3', '5'],
     difficulty: 'intermediate',
-    isPlanned: true,
+    isPlanned: false,
   },
   {
     id: '5',
@@ -96,6 +112,24 @@ export const routes: Route[] = [
     participants: ['1', '2', '3', '4', '5'],
     difficulty: 'advanced',
     isPlanned: false,
+  },
+  {
+    id: '6',
+    locationId: '6',
+    name: 'Glacier Paradise',
+    date: '2024-02-10',
+    participants: ['1', '2', '4'],
+    difficulty: 'intermediate',
+    isPlanned: false,
+  },
+  {
+    id: '7',
+    locationId: '7',
+    name: 'Stubai Adventure',
+    date: '2024-03-15',
+    participants: ['2', '3', '5'],
+    difficulty: 'advanced',
+    isPlanned: true,
   },
 ];
 
@@ -160,6 +194,28 @@ export const mediaItems: MediaItem[] = [
     locationId: '5',
     uploadedBy: '1',
     taggedUsers: ['3', '5'],
+  },
+  {
+    id: '7',
+    type: 'video',
+    url: 'https://youtu.be/LAUCbcfv95U',
+    thumbnailUrl: 'https://img.youtube.com/vi/LAUCbcfv95U/maxresdefault.jpg',
+    timestamp: '2024-03-05T11:00:00',
+    locationId: '3',
+    routeId: '4',
+    uploadedBy: '1',
+    taggedUsers: ['3', '5'],
+  },
+  {
+    id: '8',
+    type: 'video',
+    url: 'https://youtu.be/d26nXKdJpTs',
+    thumbnailUrl: 'https://img.youtube.com/vi/d26nXKdJpTs/maxresdefault.jpg',
+    timestamp: '2024-02-10T14:00:00',
+    locationId: '6',
+    routeId: '6',
+    uploadedBy: '2',
+    taggedUsers: ['1', '4'],
   },
 ];
 
