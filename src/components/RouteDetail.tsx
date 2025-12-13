@@ -27,6 +27,15 @@ export function RouteDetail({ route, onBack }: RouteDetailProps) {
   const media = getMediaByRoute(route.id);
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number | null>(null);
 
+  const getYouTubeId = (url: string) => {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?]+)/);
+    return match ? match[1] : null;
+  };
+
+  const isYouTubeUrl = (url: string) => {
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  };
+
   const getDifficultyLabel = (difficulty?: string) => {
     switch (difficulty) {
       case 'easy': return { label: 'Easy', color: 'text-green-400' };
@@ -180,18 +189,30 @@ export function RouteDetail({ route, onBack }: RouteDetailProps) {
 
           <div className="max-w-4xl max-h-[80vh] mx-4">
             {media[selectedMediaIndex].type === 'video' ? (
-              <div className="relative aspect-video bg-card rounded-xl overflow-hidden">
-                <img
-                  src={media[selectedMediaIndex].url}
-                  alt=""
-                  className="w-full h-full object-contain"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-20 h-20 rounded-full bg-primary/80 flex items-center justify-center cursor-pointer hover:bg-primary transition-colors">
-                    <Play className="w-8 h-8 text-primary-foreground ml-1" />
+              isYouTubeUrl(media[selectedMediaIndex].url) ? (
+                <div className="relative aspect-video bg-card rounded-xl overflow-hidden w-full" style={{ minWidth: '70vw' }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${getYouTubeId(media[selectedMediaIndex].url)}?autoplay=1`}
+                    title="YouTube video"
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="relative aspect-video bg-card rounded-xl overflow-hidden">
+                  <img
+                    src={media[selectedMediaIndex].url}
+                    alt=""
+                    className="w-full h-full object-contain"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-primary/80 flex items-center justify-center cursor-pointer hover:bg-primary transition-colors">
+                      <Play className="w-8 h-8 text-primary-foreground ml-1" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )
             ) : (
               <img
                 src={media[selectedMediaIndex].url}
