@@ -12,165 +12,241 @@ const UnifiedMap: React.FC<UnifiedMapProps> = ({ onResortSelect }) => {
   const austriaResorts = resorts.filter(r => r.country === 'AT');
   const czechResorts = resorts.filter(r => r.country === 'CZ');
 
+  // Map resort coordinates to SVG positions
+  // Czech Republic bounds roughly: x 180-420, y 20-140
+  // Austria bounds roughly: x 50-380, y 140-280
+  const getResortPosition = (resort: Resort) => {
+    if (resort.country === 'CZ') {
+      // Map percentage to Czech bounds
+      return {
+        x: 180 + (resort.coordinates.x / 100) * 240,
+        y: 20 + (resort.coordinates.y / 100) * 120,
+      };
+    } else {
+      // Map percentage to Austria bounds
+      return {
+        x: 50 + (resort.coordinates.x / 100) * 330,
+        y: 140 + (resort.coordinates.y / 100) * 140,
+      };
+    }
+  };
+
   return (
-    <div className="relative w-full h-full min-h-[calc(100vh-80px)] bg-gradient-to-b from-muted/20 to-background overflow-hidden">
-      {/* Map container */}
-      <div className="relative w-full h-full flex flex-col lg:flex-row">
-        
-        {/* Czech Republic */}
-        <div className="flex-1 relative p-4 md:p-8">
-          <div className="relative h-full min-h-[300px] bg-white/50 rounded-3xl border border-border/30 overflow-hidden shadow-sm">
-            {/* Country shape - Czech Republic */}
-            <svg viewBox="0 0 400 200" className="absolute inset-0 w-full h-full opacity-10">
-              <path
-                d="M50,80 Q80,40 140,50 T200,55 T260,50 T320,60 T350,80 Q360,120 340,150 T280,160 T200,155 T120,160 T60,140 Q40,110 50,80 Z"
-                fill="currentColor"
-                className="text-foreground"
-              />
-            </svg>
+    <div className="relative w-full h-full min-h-[calc(100vh-80px)] bg-background overflow-hidden p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Map SVG */}
+        <svg 
+          viewBox="0 0 500 320" 
+          className="w-full h-auto"
+          style={{ maxHeight: 'calc(100vh - 160px)' }}
+        >
+          {/* Surrounding countries (subtle) */}
+          <g className="opacity-30">
+            {/* Germany (D) - left of Czech */}
+            <text x="120" y="60" className="fill-muted-foreground text-[10px] font-medium">D</text>
+            
+            {/* Poland (PL) - top right */}
+            <text x="400" y="30" className="fill-muted-foreground text-[10px] font-medium">PL</text>
+            
+            {/* Slovakia (SK) - right of Austria/Czech */}
+            <text x="440" y="150" className="fill-muted-foreground text-[10px] font-medium">SK</text>
+            
+            {/* Hungary (HU) - bottom right */}
+            <text x="420" y="260" className="fill-muted-foreground text-[10px] font-medium">HU</text>
+            
+            {/* Italy (I) - bottom left */}
+            <text x="80" y="290" className="fill-muted-foreground text-[10px] font-medium">I</text>
+            
+            {/* Switzerland (CH) - left of Austria */}
+            <text x="20" y="200" className="fill-muted-foreground text-[10px] font-medium">CH</text>
+          </g>
 
-            {/* Country label with capital */}
-            <div className="absolute top-4 left-4 md:top-6 md:left-6">
-              <h2 className="text-xl md:text-2xl font-semibold text-foreground/90">Czech Republic</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="w-2 h-2 rounded-full bg-foreground/60" />
-                <span className="text-sm text-muted-foreground">Prague</span>
-              </div>
-            </div>
+          {/* Czech Republic */}
+          <g className="group cursor-pointer">
+            <path
+              d="M180,85 
+                 Q200,35 260,25 
+                 Q320,20 360,35 
+                 Q400,45 420,70 
+                 Q435,95 420,120 
+                 Q400,140 360,145 
+                 Q320,148 280,145 
+                 Q240,142 210,130 
+                 Q180,120 175,100 
+                 Q172,90 180,85 Z"
+              className="fill-primary/20 stroke-primary/40 stroke-[1.5] transition-all duration-300 hover:fill-primary/30"
+            />
+            {/* Country label */}
+            <text x="290" y="85" className="fill-foreground/70 text-[14px] font-semibold pointer-events-none">CZ</text>
+            
+            {/* Prague marker */}
+            <g className="pointer-events-none">
+              <circle cx="270" cy="70" r="3" className="fill-foreground/50" />
+              <text x="280" y="68" className="fill-muted-foreground text-[8px]">Praha</text>
+            </g>
+          </g>
 
-            {/* Capital marker */}
-            <div className="absolute" style={{ left: '35%', top: '40%' }}>
-              <div className="relative">
-                <div className="w-3 h-3 rounded-full bg-foreground/50 border-2 border-white shadow-sm" />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap font-medium">
-                  Praha
-                </span>
-              </div>
-            </div>
+          {/* Austria */}
+          <g className="group cursor-pointer">
+            <path
+              d="M50,220 
+                 Q30,200 50,180 
+                 Q70,165 100,160 
+                 Q130,155 160,150 
+                 Q200,145 240,145 
+                 Q280,145 320,150 
+                 Q360,155 380,170 
+                 Q400,185 395,210 
+                 Q390,235 360,250 
+                 Q320,265 280,265 
+                 Q240,265 200,260 
+                 Q160,255 120,245 
+                 Q80,235 50,220 Z"
+              className="fill-accent/30 stroke-accent/50 stroke-[1.5] transition-all duration-300 hover:fill-accent/40"
+            />
+            {/* Country label */}
+            <text x="220" y="210" className="fill-foreground/70 text-[14px] font-semibold pointer-events-none">A</text>
+            
+            {/* Vienna marker */}
+            <g className="pointer-events-none">
+              <circle cx="365" cy="175" r="3" className="fill-foreground/50" />
+              <text x="372" y="173" className="fill-muted-foreground text-[8px]">Wien</text>
+            </g>
+          </g>
 
-            {/* Resort pins */}
-            {czechResorts.map((resort) => (
-              <button
-                key={resort.id}
+          {/* Resort pins - Czech Republic */}
+          {czechResorts.map((resort) => {
+            const pos = getResortPosition(resort);
+            return (
+              <g 
+                key={resort.id} 
+                className="cursor-pointer group/pin"
                 onClick={() => onResortSelect(resort)}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-10"
-                style={{
-                  left: `${resort.coordinates.x}%`,
-                  top: `${resort.coordinates.y}%`,
-                }}
               >
-                <div className="relative flex flex-col items-center">
-                  {/* Pin */}
-                  <div className={`
-                    w-5 h-5 md:w-6 md:h-6 rounded-full shadow-lg
-                    transition-all duration-300 ease-out
-                    group-hover:scale-125
+                {/* Pin glow for visited */}
+                {resort.visited && (
+                  <circle 
+                    cx={pos.x} 
+                    cy={pos.y} 
+                    r="12" 
+                    className="fill-primary/20 animate-pulse" 
+                  />
+                )}
+                
+                {/* Pin circle */}
+                <circle 
+                  cx={pos.x} 
+                  cy={pos.y} 
+                  r="6" 
+                  className={`
+                    transition-all duration-300
+                    group-hover/pin:r-8
                     ${resort.visited 
-                      ? 'bg-primary ring-4 ring-primary/20' 
-                      : 'bg-muted-foreground/40'
+                      ? 'fill-primary stroke-white stroke-2' 
+                      : 'fill-muted-foreground/40 stroke-white stroke-1'
                     }
-                  `}>
-                    {resort.visited && (
-                      <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" />
-                    )}
-                  </div>
-                  
-                  {/* Label */}
-                  <div className={`
-                    mt-2 px-3 py-1.5 rounded-full
-                    bg-white shadow-md border border-border/50
-                    opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100
-                    transition-all duration-200
-                    whitespace-nowrap
-                  `}>
-                    <span className="text-xs md:text-sm font-medium text-foreground">
-                      {resort.name}
-                    </span>
-                  </div>
-                </div>
-              </button>
-            ))}
+                  `}
+                />
+                
+                {/* Label */}
+                <g className="opacity-0 group-hover/pin:opacity-100 transition-opacity duration-200">
+                  <rect 
+                    x={pos.x - 30} 
+                    y={pos.y + 10} 
+                    width="60" 
+                    height="18" 
+                    rx="9" 
+                    className="fill-white shadow-lg"
+                    filter="url(#shadow)"
+                  />
+                  <text 
+                    x={pos.x} 
+                    y={pos.y + 22} 
+                    textAnchor="middle" 
+                    className="fill-foreground text-[8px] font-medium"
+                  >
+                    {resort.name}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+
+          {/* Resort pins - Austria */}
+          {austriaResorts.map((resort) => {
+            const pos = getResortPosition(resort);
+            return (
+              <g 
+                key={resort.id} 
+                className="cursor-pointer group/pin"
+                onClick={() => onResortSelect(resort)}
+              >
+                {/* Pin glow for visited */}
+                {resort.visited && (
+                  <circle 
+                    cx={pos.x} 
+                    cy={pos.y} 
+                    r="12" 
+                    className="fill-primary/20 animate-pulse" 
+                  />
+                )}
+                
+                {/* Pin circle */}
+                <circle 
+                  cx={pos.x} 
+                  cy={pos.y} 
+                  r="6" 
+                  className={`
+                    transition-all duration-300
+                    group-hover/pin:r-8
+                    ${resort.visited 
+                      ? 'fill-primary stroke-white stroke-2' 
+                      : 'fill-muted-foreground/40 stroke-white stroke-1'
+                    }
+                  `}
+                />
+                
+                {/* Label */}
+                <g className="opacity-0 group-hover/pin:opacity-100 transition-opacity duration-200">
+                  <rect 
+                    x={pos.x - 30} 
+                    y={pos.y + 10} 
+                    width="60" 
+                    height="18" 
+                    rx="9" 
+                    className="fill-white"
+                    filter="url(#shadow)"
+                  />
+                  <text 
+                    x={pos.x} 
+                    y={pos.y + 22} 
+                    textAnchor="middle" 
+                    className="fill-foreground text-[8px] font-medium"
+                  >
+                    {resort.name}
+                  </text>
+                </g>
+              </g>
+            );
+          })}
+
+          {/* Shadow filter for labels */}
+          <defs>
+            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="1" stdDeviation="2" floodOpacity="0.15"/>
+            </filter>
+          </defs>
+        </svg>
+
+        {/* Legend */}
+        <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-primary" />
+            <span>Visited</span>
           </div>
-        </div>
-
-        {/* Divider */}
-        <div className="hidden lg:flex items-center px-2">
-          <div className="w-px h-2/3 bg-border/50" />
-        </div>
-
-        {/* Austria */}
-        <div className="flex-1 relative p-4 md:p-8">
-          <div className="relative h-full min-h-[300px] bg-white/50 rounded-3xl border border-border/30 overflow-hidden shadow-sm">
-            {/* Country shape - Austria */}
-            <svg viewBox="0 0 400 200" className="absolute inset-0 w-full h-full opacity-10">
-              <path
-                d="M30,100 Q60,50 120,60 T200,65 T280,60 T360,80 Q380,100 360,130 T280,150 T200,145 T120,150 T50,130 Q20,115 30,100 Z"
-                fill="currentColor"
-                className="text-foreground"
-              />
-            </svg>
-
-            {/* Country label with capital */}
-            <div className="absolute top-4 left-4 md:top-6 md:left-6">
-              <h2 className="text-xl md:text-2xl font-semibold text-foreground/90">Austria</h2>
-              <div className="flex items-center gap-2 mt-1">
-                <div className="w-2 h-2 rounded-full bg-foreground/60" />
-                <span className="text-sm text-muted-foreground">Vienna</span>
-              </div>
-            </div>
-
-            {/* Capital marker */}
-            <div className="absolute" style={{ left: '75%', top: '35%' }}>
-              <div className="relative">
-                <div className="w-3 h-3 rounded-full bg-foreground/50 border-2 border-white shadow-sm" />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-muted-foreground whitespace-nowrap font-medium">
-                  Wien
-                </span>
-              </div>
-            </div>
-
-            {/* Resort pins */}
-            {austriaResorts.map((resort) => (
-              <button
-                key={resort.id}
-                onClick={() => onResortSelect(resort)}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-10"
-                style={{
-                  left: `${resort.coordinates.x}%`,
-                  top: `${resort.coordinates.y}%`,
-                }}
-              >
-                <div className="relative flex flex-col items-center">
-                  {/* Pin */}
-                  <div className={`
-                    w-5 h-5 md:w-6 md:h-6 rounded-full shadow-lg
-                    transition-all duration-300 ease-out
-                    group-hover:scale-125
-                    ${resort.visited 
-                      ? 'bg-primary ring-4 ring-primary/20' 
-                      : 'bg-muted-foreground/40'
-                    }
-                  `}>
-                    {resort.visited && (
-                      <div className="absolute inset-0 rounded-full bg-primary/30 animate-ping" />
-                    )}
-                  </div>
-                  
-                  {/* Label */}
-                  <div className={`
-                    mt-2 px-3 py-1.5 rounded-full
-                    bg-white shadow-md border border-border/50
-                    opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100
-                    transition-all duration-200
-                    whitespace-nowrap
-                  `}>
-                    <span className="text-xs md:text-sm font-medium text-foreground">
-                      {resort.name}
-                    </span>
-                  </div>
-                </div>
-              </button>
-            ))}
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-muted-foreground/40" />
+            <span>Planned</span>
           </div>
         </div>
       </div>
