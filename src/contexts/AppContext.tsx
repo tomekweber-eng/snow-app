@@ -1,75 +1,64 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Location, Route, MediaItem, User } from '@/types';
-import { locations, routes, mediaItems, users } from '@/data/mockData';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { User, Resort, Memory, Comment } from '@/types';
+import { users, resorts, memories, comments } from '@/data/mockData';
 
 interface AppContextType {
-  locations: Location[];
-  routes: Route[];
-  mediaItems: MediaItem[];
   users: User[];
-  selectedLocation: Location | null;
-  selectedRoute: Route | null;
-  selectedMedia: MediaItem | null;
-  setSelectedLocation: (location: Location | null) => void;
-  setSelectedRoute: (route: Route | null) => void;
-  setSelectedMedia: (media: MediaItem | null) => void;
-  getRoutesByLocation: (locationId: string) => Route[];
-  getMediaByRoute: (routeId: string) => MediaItem[];
-  getMediaByLocation: (locationId: string) => MediaItem[];
-  getUserById: (userId: string) => User | undefined;
+  resorts: Resort[];
+  memories: Memory[];
+  comments: Comment[];
+  getUserById: (id: string) => User | undefined;
+  getResortById: (id: string) => Resort | undefined;
+  getMemoriesByResort: (resortId: string) => Memory[];
+  getMemoriesByUser: (userId: string) => Memory[];
+  getResortsByCountry: (country: 'AT' | 'CZ') => Resort[];
+  getAdults: () => User[];
+  getKids: () => User[];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
-  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
+export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const getUserById = (id: string) => users.find(user => user.id === id);
+  
+  const getResortById = (id: string) => resorts.find(resort => resort.id === id);
+  
+  const getMemoriesByResort = (resortId: string) => 
+    memories.filter(memory => memory.resortId === resortId);
+  
+  const getMemoriesByUser = (userId: string) =>
+    memories.filter(memory => memory.taggedUsers.includes(userId));
 
-  const getRoutesByLocation = (locationId: string) => {
-    return routes.filter(route => route.locationId === locationId);
-  };
+  const getResortsByCountry = (country: 'AT' | 'CZ') =>
+    resorts.filter(resort => resort.country === country);
 
-  const getMediaByRoute = (routeId: string) => {
-    return mediaItems.filter(media => media.routeId === routeId);
-  };
-
-  const getMediaByLocation = (locationId: string) => {
-    return mediaItems.filter(media => media.locationId === locationId);
-  };
-
-  const getUserById = (userId: string) => {
-    return users.find(user => user.id === userId);
-  };
+  const getAdults = () => users.filter(user => user.type === 'adult');
+  
+  const getKids = () => users.filter(user => user.type === 'kid');
 
   return (
-    <AppContext.Provider
-      value={{
-        locations,
-        routes,
-        mediaItems,
-        users,
-        selectedLocation,
-        selectedRoute,
-        selectedMedia,
-        setSelectedLocation,
-        setSelectedRoute,
-        setSelectedMedia,
-        getRoutesByLocation,
-        getMediaByRoute,
-        getMediaByLocation,
-        getUserById,
-      }}
-    >
+    <AppContext.Provider value={{
+      users,
+      resorts,
+      memories,
+      comments,
+      getUserById,
+      getResortById,
+      getMemoriesByResort,
+      getMemoriesByUser,
+      getResortsByCountry,
+      getAdults,
+      getKids,
+    }}>
       {children}
     </AppContext.Provider>
   );
-}
+};
 
-export function useApp() {
+export const useApp = () => {
   const context = useContext(AppContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useApp must be used within an AppProvider');
   }
   return context;
-}
+};

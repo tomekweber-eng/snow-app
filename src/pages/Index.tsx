@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { PasswordGate } from '@/components/PasswordGate';
-import { MainApp } from '@/components/MainApp';
+import PasswordGate from '@/components/PasswordGate';
+import MainApp from '@/components/MainApp';
 
 const Index = () => {
   const { isAuthenticated } = useAuth();
