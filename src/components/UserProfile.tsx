@@ -1,17 +1,29 @@
 import React from 'react';
-import { User, Memory } from '@/types';
+import { User, Memory, Resort } from '@/types';
 import { useApp } from '@/contexts/AppContext';
-import { ArrowLeft, Play, MapPin, Calendar } from 'lucide-react';
+import { ArrowLeft, Play, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
+import BurgerMenu from '@/components/BurgerMenu';
 
 interface UserProfileProps {
   user: User;
   onBack: () => void;
   onMemorySelect: (memory: Memory) => void;
+  onResortSelect: (resort: Resort) => void;
+  onUserSelect: (user: User) => void;
+  isAdmin: boolean;
+  onAdminToggle: () => void;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({ user, onBack, onMemorySelect }) => {
+const UserProfile: React.FC<UserProfileProps> = ({ 
+  user, 
+  onBack, 
+  onMemorySelect,
+  onResortSelect,
+  onUserSelect,
+  isAdmin,
+  onAdminToggle
+}) => {
   const { getMemoriesByUser, getResortById } = useApp();
   const userMemories = getMemoriesByUser(user.id);
 
@@ -20,20 +32,36 @@ const UserProfile: React.FC<UserProfileProps> = ({ user, onBack, onMemorySelect 
 
   return (
     <div className="min-h-screen bg-background animate-glide-in">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
+      {/* Header - consistent with other views */}
+      <header className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/50">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
+          {/* Burger menu */}
+          <BurgerMenu
+            onResortSelect={onResortSelect}
+            onUserSelect={onUserSelect}
+            isAdmin={isAdmin}
+            onAdminToggle={onAdminToggle}
+          />
+          
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={onBack}
-            className="rounded-full"
+            className="gap-2 rounded-full"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="font-semibold text-lg">Profile</h1>
+          
+          <h1 className="font-semibold text-lg flex-1">Profile</h1>
+          
+          {isAdmin && (
+            <div className="px-3 py-1.5 bg-primary/10 rounded-full">
+              <span className="text-xs font-medium text-primary">Admin</span>
+            </div>
+          )}
         </div>
-      </div>
+      </header>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Profile header */}
