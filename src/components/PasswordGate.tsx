@@ -1,111 +1,88 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Mountain, Lock, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Mountain, Snowflake } from 'lucide-react';
-import winterHero from '@/assets/winter-hero.jpg';
+import { toast } from 'sonner';
 
-export function PasswordGate() {
+const PasswordGate: React.FC = () => {
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
-  const [isShaking, setIsShaking] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    
+    // Small delay for feel
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     const success = login(password);
+    
     if (!success) {
-      setError(true);
-      setIsShaking(true);
-      setTimeout(() => setIsShaking(false), 500);
-      setTimeout(() => setError(false), 2000);
+      toast.error('Incorrect password');
     }
+    
+    setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Background image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${winterHero})` }}
-      />
-      
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
-      
-      {/* Animated snow particles */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(25)].map((_, i) => (
-          <Snowflake
-            key={i}
-            className="absolute text-snow/30 animate-snow-drift"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${15 + Math.random() * 10}s`,
-              fontSize: `${Math.random() * 16 + 8}px`,
-            }}
-          />
-        ))}
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+      {/* Background decoration */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
       </div>
 
-      {/* Warm glow effect */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/15 rounded-full blur-[120px] animate-glow-pulse" />
-
-      {/* Main content */}
-      <div className={`relative z-10 w-full max-w-md px-6 ${isShaking ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
-        <div className="text-center mb-10 animate-fade-up">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-primary/30 to-firelight/20 border border-primary/40 mb-6 shadow-glow backdrop-blur-sm">
+      <div className="relative z-10 w-full max-w-sm animate-fade-up">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/30 flex items-center justify-center mb-4 shadow-lg">
             <Mountain className="w-10 h-10 text-primary" />
           </div>
-          <h1 className="font-display text-4xl md:text-5xl font-semibold text-foreground mb-3">
-            Winter Memories
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            A shared journal for our mountain adventures
+          <h1 className="text-3xl font-semibold text-center">Winter Memories</h1>
+          <p className="text-muted-foreground text-center mt-2">
+            Our private winter journal
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               type="password"
-              placeholder="Enter the secret password..."
+              placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`text-center text-lg h-14 bg-card/60 ${error ? 'border-destructive ring-destructive/50' : ''}`}
+              className="pl-12 h-14 text-lg rounded-2xl bg-muted border-0 focus:ring-2 focus:ring-primary/20"
               autoFocus
             />
-            {error && (
-              <p className="absolute -bottom-6 left-0 right-0 text-center text-sm text-destructive animate-fade-up">
-                Wrong password. Try again!
-              </p>
-            )}
           </div>
 
           <Button
             type="submit"
-            variant="warm"
-            size="xl"
-            className="w-full"
+            disabled={!password || isLoading}
+            className="w-full h-14 text-lg rounded-2xl font-medium"
           >
-            Enter the Cabin
+            {isLoading ? (
+              <span className="animate-pulse">Entering...</span>
+            ) : (
+              <>
+                Enter
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </>
+            )}
           </Button>
         </form>
 
-        <p className="text-center text-muted-foreground/60 text-sm mt-8 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-          A private space for friends
+        {/* Hint */}
+        <p className="text-center text-sm text-muted-foreground mt-8">
+          Private space for our group
         </p>
       </div>
-
-      <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-10px); }
-          75% { transform: translateX(10px); }
-        }
-      `}</style>
     </div>
   );
-}
+};
+
+export default PasswordGate;

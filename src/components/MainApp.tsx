@@ -1,103 +1,126 @@
 import React, { useState } from 'react';
-import { Header } from '@/components/Header';
-import { AustriaMap } from '@/components/AustriaMap';
-import { LocationDetail } from '@/components/LocationDetail';
-import { RouteDetail } from '@/components/RouteDetail';
-import { Location, Route } from '@/types';
-import { Snowflake } from 'lucide-react';
+import { Resort, User, Memory } from '@/types';
+import CountryMap from '@/components/CountryMap';
+import ResortMap from '@/components/ResortMap';
+import FloatingNav from '@/components/FloatingNav';
+import UserProfile from '@/components/UserProfile';
+import MediaViewer from '@/components/MediaViewer';
+import { Mountain } from 'lucide-react';
 
-type View = 'map' | 'location' | 'route';
+type View = 'countries' | 'resort' | 'profile';
 
-export function MainApp() {
-  const [currentView, setCurrentView] = useState<View>('map');
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
+const MainApp: React.FC = () => {
+  const [currentView, setCurrentView] = useState<View>('countries');
+  const [selectedResort, setSelectedResort] = useState<Resort | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [activeCountry, setActiveCountry] = useState<'AT' | 'CZ'>('AT');
 
-  const handleLocationSelect = (location: Location) => {
-    setSelectedLocation(location);
-    setCurrentView('location');
+  const handleResortSelect = (resort: Resort) => {
+    setSelectedResort(resort);
+    setCurrentView('resort');
   };
 
-  const handleRouteSelect = (route: Route) => {
-    setSelectedRoute(route);
-    setCurrentView('route');
+  const handleUserSelect = (user: User) => {
+    setSelectedUser(user);
+    setCurrentView('profile');
   };
 
-  const handleBackToMap = () => {
-    setCurrentView('map');
-    setSelectedLocation(null);
-    setSelectedRoute(null);
-  };
-
-  const handleBackToLocation = () => {
-    setCurrentView('location');
-    setSelectedRoute(null);
+  const handleBackToCountries = () => {
+    setCurrentView('countries');
+    setSelectedResort(null);
+    setSelectedUser(null);
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
-      {/* Background ambient effects */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Gradient orbs */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-mountain/10 rounded-full blur-[100px]" />
-        
-        {/* Floating snowflakes */}
-        {[...Array(8)].map((_, i) => (
-          <Snowflake
-            key={i}
-            className="absolute text-snow/10 animate-snow-drift"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 10}s`,
-              animationDuration: `${15 + Math.random() * 10}s`,
-              fontSize: `${12 + Math.random() * 12}px`,
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      {currentView === 'countries' && (
+        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border/50">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Mountain className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h1 className="font-semibold text-lg">Winter Memories</h1>
+                  <p className="text-sm text-muted-foreground">Our shared adventures</p>
+                </div>
+              </div>
 
-      <Header 
-        onNavigateHome={handleBackToMap} 
-        showBackHome={currentView !== 'map'} 
-      />
-
-      <main className="container mx-auto px-4 py-6 relative z-10">
-        {currentView === 'map' && (
-          <div className="animate-fade-up">
-            <div className="text-center mb-8">
-              <h1 className="font-display text-3xl md:text-4xl font-semibold text-foreground mb-3">
-                Our Mountain Adventures
-              </h1>
-              <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                Tap a location to explore shared memories from our ski trips across Austria
-              </p>
+              {/* Country tabs */}
+              <div className="flex gap-1 bg-muted rounded-full p-1">
+                <button
+                  onClick={() => setActiveCountry('AT')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    activeCountry === 'AT' 
+                      ? 'bg-white shadow-sm text-foreground' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Austria
+                </button>
+                <button
+                  onClick={() => setActiveCountry('CZ')}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    activeCountry === 'CZ' 
+                      ? 'bg-white shadow-sm text-foreground' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Czechia
+                </button>
+              </div>
             </div>
-            <AustriaMap onLocationSelect={handleLocationSelect} />
+          </div>
+        </header>
+      )}
+
+      {/* Main content */}
+      <main className="relative">
+        {currentView === 'countries' && (
+          <div className="max-w-7xl mx-auto p-4">
+            <div className="animate-fade-up">
+              <CountryMap 
+                country={activeCountry} 
+                onResortSelect={handleResortSelect} 
+              />
+            </div>
           </div>
         )}
 
-        {currentView === 'location' && selectedLocation && (
-          <LocationDetail
-            location={selectedLocation}
-            onBack={handleBackToMap}
-            onRouteSelect={handleRouteSelect}
+        {currentView === 'resort' && selectedResort && (
+          <ResortMap 
+            resort={selectedResort} 
+            onBack={handleBackToCountries} 
           />
         )}
 
-        {currentView === 'route' && selectedRoute && (
-          <RouteDetail
-            route={selectedRoute}
-            onBack={handleBackToLocation}
+        {currentView === 'profile' && selectedUser && (
+          <UserProfile 
+            user={selectedUser} 
+            onBack={handleBackToCountries}
+            onMemorySelect={setSelectedMemory}
           />
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 py-8 text-center text-sm text-muted-foreground/60">
-        <p>A private winter journal for friends 🏔️</p>
-      </footer>
+      {/* Floating Navigation */}
+      <FloatingNav 
+        onResortSelect={handleResortSelect}
+        onUserSelect={handleUserSelect}
+      />
+
+      {/* Memory viewer */}
+      {selectedMemory && (
+        <MediaViewer 
+          memory={selectedMemory} 
+          onClose={() => setSelectedMemory(null)} 
+        />
+      )}
     </div>
   );
-}
+};
+
+export default MainApp;
