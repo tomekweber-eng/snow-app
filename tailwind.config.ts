@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Outfit', 'sans-serif'],
-        display: ['Playfair Display', 'serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Inter', 'sans-serif'],
+        display: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Inter', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -51,18 +51,13 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        snow: {
-          DEFAULT: "hsl(var(--snow))",
-          muted: "hsl(var(--snow-muted))",
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          elevated: "hsl(var(--surface-elevated))",
+          overlay: "hsl(var(--surface-overlay))",
         },
-        twilight: "hsl(var(--twilight))",
-        firelight: {
-          DEFAULT: "hsl(var(--firelight))",
-          glow: "hsl(var(--firelight-glow))",
-        },
-        mountain: "hsl(var(--mountain-blue))",
-        pine: "hsl(var(--pine))",
-        frost: "hsl(var(--frost))",
+        visited: "hsl(var(--visited))",
+        unvisited: "hsl(var(--unvisited))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -78,6 +73,8 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        "2xl": "1.25rem",
+        "3xl": "1.5rem",
       },
       keyframes: {
         "accordion-down": {
@@ -88,26 +85,16 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        shimmer: "shimmer 3s ease-in-out infinite",
-      },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-warm": "var(--gradient-warmth)",
-        "gradient-twilight": "var(--gradient-twilight)",
-        "gradient-snow": "var(--gradient-snow)",
       },
       boxShadow: {
-        glow: "var(--shadow-glow)",
-        card: "var(--shadow-card)",
-        elevated: "var(--shadow-elevated)",
+        sm: "var(--shadow-sm)",
+        md: "var(--shadow-md)",
+        lg: "var(--shadow-lg)",
+        xl: "var(--shadow-xl)",
       },
     },
   },

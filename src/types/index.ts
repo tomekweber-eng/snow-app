@@ -1,59 +1,52 @@
-// Winter Memory Journal Types
+// Winter Memory Atlas Types
+
+export type SportType = 'ski' | 'snowboard';
+export type UserType = 'adult' | 'kid';
 
 export interface User {
   id: string;
   name: string;
-  avatar?: string;
-  type: 'skier' | 'snowboarder';
+  nickname?: string;
+  avatar: string;
+  bio?: string;
+  sport: SportType;
+  type: UserType;
 }
 
-export interface Location {
+export interface Country {
   id: string;
   name: string;
-  region: string;
-  coordinates: { lat: number; lng: number };
+  code: 'AT' | 'CZ';
+}
+
+export interface Resort {
+  id: string;
+  name: string;
+  country: 'AT' | 'CZ';
+  coordinates: { x: number; y: number }; // Relative position on country map (0-100)
+  mapImage: string;
   elevation?: string;
-  imageUrl?: string;
-  tripDates: string[];
+  visited: boolean;
 }
 
-export interface Route {
+export interface Memory {
   id: string;
-  locationId: string;
-  name: string;
-  date: string;
-  participants: string[];
-  difficulty?: 'easy' | 'intermediate' | 'advanced' | 'expert';
-  isPlanned?: boolean;
-  path?: { lat: number; lng: number }[];
-}
-
-export interface MediaItem {
-  id: string;
+  resortId: string;
   type: 'photo' | 'video';
   url: string;
   thumbnailUrl?: string;
-  timestamp: string;
-  locationId: string;
-  routeId?: string;
-  uploadedBy: string;
+  date: string;
+  description?: string;
   taggedUsers: string[];
+  position?: { x: number; y: number }; // Position on resort map
 }
 
 export interface Comment {
   id: string;
   content: string;
   authorId: string;
-  targetType: 'route' | 'photo' | 'video';
+  targetType: 'memory' | 'resort';
   targetId: string;
   timestamp: string;
   taggedUsers: string[];
-}
-
-export interface Trip {
-  id: string;
-  locationId: string;
-  startDate: string;
-  endDate: string;
-  participants: string[];
 }
