@@ -33,7 +33,9 @@ const ResortMap: React.FC<ResortMapProps> = ({
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [hasMoved, setHasMoved] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [clickStart, setClickStart] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.25, 3));
@@ -45,57 +47,89 @@ const ResortMap: React.FC<ResortMapProps> = ({
 
   // Mouse/touch handlers for panning
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button !== 0) return; // Only left click
+    if (e.button !== 0) return;
     setIsDragging(true);
+    setHasMoved(false);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+    setClickStart({ x: e.clientX, y: e.clientY });
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging) return;
+    const dx = Math.abs(e.clientX - clickStart.x);
+    const dy = Math.abs(e.clientY - clickStart.y);
+    if (dx > 5 || dy > 5) {
+      setHasMoved(true);
+    }
     setPosition({
       x: e.clientX - dragStart.x,
       y: e.clientY - dragStart.y,
     });
   };
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp = (e: React.MouseEvent) => {
+    const wasClick = isDragging && !hasMoved;
+    setIsDragging(false);
+    
+    // If it was a click (no movement) and admin mode, add memory
+    if (wasClick && isAdmin && containerRef.current) {
+      const innerDiv = containerRef.current.querySelector('.map-inner') as HTMLElement;
+      if (innerDiv) {
+        const rect = innerDiv.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        setAddMemoryPosition({ x, y });
+      }
+    }
+  };
 
   // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
       setIsDragging(true);
+      setHasMoved(false);
       setDragStart({ 
         x: e.touches[0].clientX - position.x, 
         y: e.touches[0].clientY - position.y 
       });
+      setClickStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || e.touches.length !== 1) return;
+    const dx = Math.abs(e.touches[0].clientX - clickStart.x);
+    const dy = Math.abs(e.touches[0].clientY - clickStart.y);
+    if (dx > 5 || dy > 5) {
+      setHasMoved(true);
+    }
     setPosition({
       x: e.touches[0].clientX - dragStart.x,
       y: e.touches[0].clientY - dragStart.y,
     });
   };
 
-  const handleTouchEnd = () => setIsDragging(false);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const wasClick = isDragging && !hasMoved;
+    setIsDragging(false);
+    
+    if (wasClick && isAdmin && containerRef.current && e.changedTouches.length > 0) {
+      const touch = e.changedTouches[0];
+      const innerDiv = containerRef.current.querySelector('.map-inner') as HTMLElement;
+      if (innerDiv) {
+        const rect = innerDiv.getBoundingClientRect();
+        const x = ((touch.clientX - rect.left) / rect.width) * 100;
+        const y = ((touch.clientY - rect.top) / rect.height) * 100;
+        setAddMemoryPosition({ x, y });
+      }
+    }
+  };
 
   // Wheel zoom
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const delta = e.deltaY > 0 ? -0.1 : 0.1;
     setScale(prev => Math.min(Math.max(prev + delta, 0.5), 3));
-  };
-
-  const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isAdmin || isDragging) return;
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
-    setAddMemoryPosition({ x, y });
   };
 
   const handleSaveMemory = (data: {
@@ -196,17 +230,14 @@ const ResortMap: React.FC<ResortMapProps> = ({
         onWheel={handleWheel}
       >
         <div 
-          className="w-full h-full relative transition-transform duration-100"
+          className="map-inner w-full h-full relative transition-transform duration-100"
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
             transformOrigin: 'center center',
           }}
         >
           {/* Resort Map Image - Desaturated */}
-          <div 
-            className="absolute inset-0"
-            onClick={handleMapClick}
-          >
+          <div className="absolute inset-0">
             <img
               src={resort.mapImage}
               alt={`${resort.name} ski map`}
@@ -233,38 +264,33 @@ const ResortMap: React.FC<ResortMapProps> = ({
               }}
             >
               <div className="relative flex flex-col items-center">
-                {/* Pin circle with icon */}
+                {/* Pin circle with icon - smaller size */}
                 <div className={`
-                  relative w-10 h-10 md:w-12 md:h-12 rounded-full
+                  relative w-7 h-7 md:w-8 md:h-8 rounded-full
                   flex items-center justify-center
-                  shadow-xl border-3 border-white
+                  shadow-lg border-2 border-white
                   transition-all duration-300
-                  group-hover:scale-110 group-hover:shadow-2xl
+                  group-hover:scale-125 group-hover:shadow-xl
                   ${memory.type === 'video' 
                     ? 'bg-primary text-primary-foreground' 
                     : 'bg-accent text-accent-foreground'
                   }
                 `}>
                   {memory.type === 'video' ? (
-                    <Play className="w-5 h-5 md:w-6 md:h-6 ml-0.5" fill="currentColor" />
+                    <Play className="w-3 h-3 md:w-3.5 md:h-3.5 ml-0.5" fill="currentColor" />
                   ) : (
-                    <Camera className="w-5 h-5 md:w-6 md:h-6" />
+                    <Camera className="w-3 h-3 md:w-3.5 md:h-3.5" />
                   )}
-                  
-                  {/* Pulse animation */}
-                  <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${
-                    memory.type === 'video' ? 'bg-primary' : 'bg-accent'
-                  }`} style={{ animationDuration: '2s' }} />
                 </div>
                 
-                {/* Pin pointer/tail */}
-                <div className={`w-0 h-0 -mt-0.5 border-l-[8px] border-r-[8px] border-t-[10px] border-l-transparent border-r-transparent ${
+                {/* Pin pointer/tail - smaller */}
+                <div className={`w-0 h-0 -mt-0.5 border-l-[5px] border-r-[5px] border-t-[6px] border-l-transparent border-r-transparent ${
                   memory.type === 'video' ? 'border-t-primary' : 'border-t-accent'
                 }`} />
 
-                {/* Tagged users count badge */}
+                {/* Tagged users count badge - smaller */}
                 {memory.taggedUsers.length > 0 && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white border-2 border-white flex items-center justify-center text-[10px] font-bold text-foreground shadow-lg">
+                  <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-white border border-border flex items-center justify-center text-[8px] font-bold text-foreground shadow">
                     {memory.taggedUsers.length}
                   </div>
                 )}
