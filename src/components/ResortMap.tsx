@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Resort, Memory, User } from '@/types';
 import { useApp } from '@/contexts/AppContext';
-import { ArrowLeft, Play, MapPin, Plus, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ArrowLeft, Play, MapPin, Plus, ZoomIn, ZoomOut, Maximize2, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import VideoPopup from '@/components/VideoPopup';
 import BurgerMenu from '@/components/BurgerMenu';
@@ -218,7 +218,7 @@ const ResortMap: React.FC<ResortMapProps> = ({
             />
           </div>
 
-          {/* Memory markers */}
+          {/* Memory markers - Pin style with icons */}
           {resortMemories.map((memory) => (
             <button
               key={memory.id}
@@ -226,61 +226,53 @@ const ResortMap: React.FC<ResortMapProps> = ({
                 e.stopPropagation();
                 setSelectedMemory(memory);
               }}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 group z-10"
+              className="absolute transform -translate-x-1/2 -translate-y-full group z-10"
               style={{
                 left: `${memory.position?.x || 50}%`,
                 top: `${memory.position?.y || 50}%`,
               }}
             >
-              <div className="relative">
-                {/* Glow effect */}
-                <div className="absolute inset-0 w-14 h-14 -m-1 rounded-xl bg-primary/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                {/* Thumbnail */}
+              <div className="relative flex flex-col items-center">
+                {/* Pin circle with icon */}
                 <div className={`
-                  relative w-12 h-12 md:w-14 md:h-14 rounded-xl overflow-hidden
-                  bg-white p-0.5 shadow-xl border-2 border-white
+                  relative w-10 h-10 md:w-12 md:h-12 rounded-full
+                  flex items-center justify-center
+                  shadow-xl border-3 border-white
                   transition-all duration-300
                   group-hover:scale-110 group-hover:shadow-2xl
-                  ${memory.type === 'video' ? 'ring-2 ring-primary ring-offset-2' : ''}
+                  ${memory.type === 'video' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-accent text-accent-foreground'
+                  }
                 `}>
-                  <img
-                    src={memory.thumbnailUrl || memory.url}
-                    alt=""
-                    className="w-full h-full object-cover rounded-lg"
-                    draggable={false}
-                  />
-                  {memory.type === 'video' && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                      <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow-lg">
-                        <Play className="w-3.5 h-3.5 text-primary ml-0.5" fill="currentColor" />
-                      </div>
-                    </div>
+                  {memory.type === 'video' ? (
+                    <Play className="w-5 h-5 md:w-6 md:h-6 ml-0.5" fill="currentColor" />
+                  ) : (
+                    <Camera className="w-5 h-5 md:w-6 md:h-6" />
                   )}
+                  
+                  {/* Pulse animation */}
+                  <div className={`absolute inset-0 rounded-full animate-ping opacity-20 ${
+                    memory.type === 'video' ? 'bg-primary' : 'bg-accent'
+                  }`} style={{ animationDuration: '2s' }} />
                 </div>
+                
+                {/* Pin pointer/tail */}
+                <div className={`w-0 h-0 -mt-0.5 border-l-[8px] border-r-[8px] border-t-[10px] border-l-transparent border-r-transparent ${
+                  memory.type === 'video' ? 'border-t-primary' : 'border-t-accent'
+                }`} />
 
-                {/* Tagged users */}
+                {/* Tagged users count badge */}
                 {memory.taggedUsers.length > 0 && (
-                  <div className="absolute -bottom-1 -right-1 flex -space-x-1.5">
-                    {memory.taggedUsers.slice(0, 2).map((userId) => {
-                      const user = getUserById(userId);
-                      return user ? (
-                        <div
-                          key={userId}
-                          className="w-5 h-5 rounded-full bg-white border-2 border-white flex items-center justify-center text-[9px] font-bold text-primary shadow-md"
-                          style={{ backgroundColor: 'hsl(var(--primary) / 0.15)' }}
-                        >
-                          {user.name.charAt(0)}
-                        </div>
-                      ) : null;
-                    })}
+                  <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-white border-2 border-white flex items-center justify-center text-[10px] font-bold text-foreground shadow-lg">
+                    {memory.taggedUsers.length}
                   </div>
                 )}
 
-                {/* Tooltip */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  <div className="px-2 py-1 bg-foreground text-background text-xs font-medium rounded-lg whitespace-nowrap">
-                    {memory.description || 'View memory'}
+                {/* Tooltip on hover */}
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  <div className="px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-full whitespace-nowrap shadow-lg">
+                    {memory.description || (memory.type === 'video' ? 'Watch video' : 'View photo')}
                   </div>
                 </div>
               </div>
